@@ -8,12 +8,13 @@ class BasePagination(PageNumberPagination):
     page_size_query_param = 'size'
     page_query_param = 'page'
     max_page_size = 1000
-    page_size = 2
+    page_size = 10
 
 
 class TreeSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     title = serializers.CharField(max_length=20, source='name')
+    label = serializers.CharField(max_length=20, source='name')
     organization_type_choices = (
         ("company", "公司"),
         ("department", "部门")

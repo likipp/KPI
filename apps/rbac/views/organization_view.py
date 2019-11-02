@@ -34,6 +34,7 @@ class OrganizationUserTreeView(APIView):
             new_item = {
                 'id': 'o' + str(item['id']),
                 'title': item['label'],
+                'label': item['label'],
                 'pid': item['pid'],
                 'children': item['children']
             }
