@@ -13,7 +13,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('users/list', user_view.UserListView.as_view(), name='user_list'),
     path('users/info', user_view.UserInfoView.as_view(), name='user_info'),
-    path('organization/tree', organization_view.OrganizationTreeView.as_view(), name='organizations_tree'),
+    path('organization/tree/', organization_view.OrganizationTreeView.as_view(), name='organizations_tree'),
     path('organization/user/tree/', organization_view.OrganizationUserTreeView.as_view(),
          name='organization_user_tree')
 ]

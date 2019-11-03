@@ -69,6 +69,17 @@ class UserViewSet(ModelViewSet):
     #     serializer.is_valid(raise_exception=True)
     #     self.perform_create(serializer)
     #     return Response(serializer.data)
+    
+    def set_password(self, request, pk=None):
+        user = UserProfile.objects.filter(id=pk)
+        new_password1 = request.data['new_password1']
+        new_password2 = request.data['new_password2']
+        if new_password1 == new_password2:
+            user.set_password(new_password2)
+            return Response('密码修改成功')
+        else:
+            return Response('密码修改失败，两次输入不一致')
+
 
 
 class UserListView(ListAPIView):
