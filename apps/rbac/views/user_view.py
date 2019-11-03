@@ -35,6 +35,18 @@ class UserInfoView(APIView):
 
 
 class UserViewSet(ModelViewSet):
+    """
+        retrieve:
+                返回指定用户信息
+        update:
+                更新用户信息
+        destroy:
+                删除用户记录
+        create:
+                创建用户记录
+        partial_update:
+                更新记录部分字段
+        """
     queryset = UserProfile.objects.all()
     serializer_class = UserListSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
