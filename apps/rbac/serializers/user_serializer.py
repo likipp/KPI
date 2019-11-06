@@ -7,28 +7,68 @@ class UserListSerializer(serializers.ModelSerializer):
     """
     用户列表序列化
     """
-    roles = serializers.SerializerMethodField()
-    superior = serializers.SerializerMethodField()
+    # roles = serializers.SerializerMethodField()
+    # superior = serializers.SerializerMethodField()
+    # position = serializers.SerializerMethodField()
+    # department = serializers.SerializerMethodField()
+    #
+    # def get_roles(self, obj):
+    #     return obj.roles.values()
+    #
+    # def get_superior(self, obj):
+    #     if obj.superior is not None:
+    #         superior = {
+    #             "id": obj.superior.id,
+    #             "name": obj.superior.name
+    #         }
+    #         return superior
+    #     else:
+    #         superior = {}
+    #         return superior
+    #
+    # def get_position(self, obj):
+    #     if obj.position is not None:
+    #         position = {
+    #             "id": obj.position.id,
+    #             "name": obj.position.name
+    #         }
+    #         return position
+    #     else:
+    #         position = {}
+    #         return position
+    #
+    # def get_department(self, obj):
+    #     if obj.department is not None:
+    #         department = {
+    #             "id": obj.department.id,
+    #             "name": obj.department.name
+    #         }
+    #         return department
+    #     else:
+    #         department = {}
+    #         return department
 
-    def get_roles(self, obj):
-        return obj.roles.values()
-
-    def get_superior(self, obj):
-        if obj.superior is not None:
-            superior = {
-                "id": obj.superior.id,
-                "name": obj.superior.name
-            }
-            return superior
+    def to_representation(self, instance):
+        ret = super(UserListSerializer, self).to_representation(instance)
+        if instance.superior is not None:
+            ret['superior'] = {'id': instance.superior.id, 'name': instance.superior.name}
         else:
-            superior = {}
-            return superior
+            ret['superior'] = {}
+        if instance.department is not None:
+            ret['department'] = {'id': instance.department.id, 'name': instance.department.name}
+        else:
+            ret['department'] = {}
+        if instance.position is not None:
+            ret['position'] = {'id': instance.position.id, 'name': instance.position.name}
+        else:
+            ret['position'] = {}
+        return ret
 
     class Meta:
         model = UserProfile
         fields = ['id', 'username', 'name', 'mobile', 'email', 'avatar', 'department', 'position', 'superior',
-                  'is_active', 'roles']
-        depth = 1
+                  "is_superuser", "is_staff",  'is_active', 'roles']
+        # depth = 1
 
 
 class UserModifySerializer(serializers.ModelSerializer):
@@ -58,7 +98,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'name', 'mobile', 'email', 'department', 'position', 'is_active', 'roles']
+        fields = ['id', 'username', 'name', 'mobile', 'email', 'department',
+                  'position', 'is_active', 'roles', 'superior']
 
     def validate_username(self, username):
         if UserProfile.objects.filter(username=username):
@@ -100,4 +141,4 @@ class UserInfoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('id', 'name', 'mobile', 'email', 'position', 'username',
-                  "is_superuser", "is_staff", "is_active", "department")
+                  "is_superuser", "is_staff", "is_active", "department", "superior")

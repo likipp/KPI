@@ -81,10 +81,9 @@ class UserViewSet(ModelViewSet):
             return Response('密码修改失败，两次输入不一致')
 
 
-
 class UserListView(ListAPIView):
     queryset = UserProfile.objects.all()
-    serializer_class = UserInfoListSerializer
+    serializer_class = UserListSerializer
     filter_class = UserFilter
     # filter_backends = (filters.SearchFilter,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
