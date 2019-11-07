@@ -18,6 +18,7 @@ class UserInfoView(APIView):
 
     def get(self, request):
         user = request.user
+        print(user, 2222)
         if user is not None:
             data = {
                 'id': user.id,
