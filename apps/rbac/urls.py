@@ -2,12 +2,13 @@ from rest_framework import routers
 
 from django.urls import path, include
 
-from rbac.views import user_view, organization_view, position_view
+from rbac.views import user_view, organization_view, position_view, role_view
 
 router = routers.SimpleRouter()
 router.register('users', user_view.UserViewSet, base_name="users")
 router.register('organizations', organization_view.OrganizationViewSet, base_name="organizations")
 router.register('position', position_view.PositionViewSet, base_name="position")
+router.register('roles', role_view.RoleViewSet, base_name="roles")
 
 urlpatterns = [
     path('', include(router.urls)),
