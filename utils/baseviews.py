@@ -40,7 +40,6 @@ class TreeAPIView(ListAPIView):
                     pid = tree_dict[i]['pid']
                     parent = tree_dict[pid]
                     parent.setdefault('children', []).append(tree_dict[i])
-                    print(parent)
                 else:
                     tree_data.append(tree_dict[i])
             results = tree_data

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from ..models import Organization
+from utils.baseviews import TreeSerializer
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -10,6 +11,16 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = '__all__'
+
+
+class OrganizationTreeSerializer(TreeSerializer):
+
+    title = serializers.CharField(max_length=20, source='name')
+    organization_type_choices = (
+        ("company", "公司"),
+        ("department", "部门")
+    )
+    type = serializers.ChoiceField(choices=organization_type_choices, source="get_type_display")
 
 
 class UserSerializer(serializers.Serializer):
