@@ -13,13 +13,13 @@ class BasePagination(PageNumberPagination):
 
 class TreeSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    title = serializers.CharField(max_length=20, source='name')
     label = serializers.CharField(max_length=20, source='name')
-    organization_type_choices = (
-        ("company", "公司"),
-        ("department", "部门")
-    )
-    type = serializers.ChoiceField(choices=organization_type_choices, source="get_type_display")
+    # title = serializers.CharField(max_length=20, source='name')
+    # organization_type_choices = (
+    #     ("company", "公司"),
+    #     ("department", "部门")
+    # )
+    # type = serializers.ChoiceField(choices=organization_type_choices, source="get_type_display")
     pid = serializers.PrimaryKeyRelatedField(read_only=True)
 
 
@@ -40,6 +40,7 @@ class TreeAPIView(ListAPIView):
                     pid = tree_dict[i]['pid']
                     parent = tree_dict[pid]
                     parent.setdefault('children', []).append(tree_dict[i])
+                    print(parent)
                 else:
                     tree_data.append(tree_dict[i])
             results = tree_data

@@ -28,7 +28,7 @@ SECRET_KEY = 'kb!s^u))(a96swe9o)scjkn=*s^s-*jr(($lj4f(hhhd+%3a8='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -126,7 +126,7 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 

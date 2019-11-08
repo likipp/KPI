@@ -21,6 +21,12 @@ class OrganizationUserTreeSerializer(serializers.ModelSerializer):
     """
     组织结构树序列化
     """
+    # title = serializers.CharField(max_length=20, source='name')
+    # organization_type_choices = (
+    #     ("company", "公司"),
+    #     ("department", "部门")
+    # )
+    # type = serializers.ChoiceField(choices=organization_type_choices, source="get_type_display")
     label = serializers.StringRelatedField(source='name')
     children = UserSerializer(many=True, read_only=True, source='userprofile_set')
 
