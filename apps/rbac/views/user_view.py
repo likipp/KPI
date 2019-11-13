@@ -29,10 +29,204 @@ class UserInfoView(APIView):
         except AttributeError:
             return None
 
+    def get_menu_from_role(self, request):
+        if request.user:
+            menu_dict = {}
+            menus = request.user.roles.values(
+                'menus__id',
+                'menus__name',
+                'menus__path',
+                'menus__is_frame',
+                'menus__is_show',
+                'menus__component',
+                'menus__icon',
+                'menus__sort',
+                'menus__pid'
+            ).distinct()
+            for item in menus:
+                if item['menus__pid'] is None:
+                    if item['menus__is_frame']:
+                        # 判断是否外部链接
+                        top_menu = {
+                            'id': item['menus__id'],
+                            'path': item['menus__path'],
+                            'component': 'components/main',
+                            'children': [{
+                                'path': item['menus__path'],
+                                'meta': {
+                                    'title': item['menus__name'],
+                                    'icon': item['menus__icon']
+                                }
+                            }],
+                            'pid': item['menus__pid'],
+                            'sort': item['menus__sort']
+                        }
+                    else:
+                        top_menu = {
+                            'id': item['menus__id'],
+                            'name': item['menus__name'],
+                            'path': '/' + item['menus__path'],
+                            'component': 'components/main',
+                            'alwaysShow': True,
+                            'meta': {
+                                'title': item['menus__name'],
+                                'icon': item['menus__icon']
+                            },
+                            'pid': item['menus__pid'],
+                            'sort': item['menus__sort'],
+                            'children': []
+                        }
+                    menu_dict[item['menus__id']] = top_menu
+                else:
+                    if item['menus__is_frame']:
+                        children_menu = {
+                            'id': item['menus__id'],
+                            'name': item['menus__name'],
+                            'path': item['menus__path'],
+                            'component': 'components/main',
+                            'meta': {
+                                'title': item['menus__name'],
+                                'icon': item['menus__icon'],
+                            },
+                            'pid': item['menus__pid'],
+                            'sort': item['menus__sort']
+                        }
+                    elif item['menus__is_show']:
+                        children_menu = {
+                            'id': item['menus__id'],
+                            'name': item['menus__name'],
+                            'path': item['menus__path'],
+                            'component': item['menus__component'],
+                            'meta': {
+                                'title': item['menus__name'],
+                                'icon': item['menus__icon'],
+                            },
+                            'pid': item['menus__pid'],
+                            'sort': item['menus__sort']
+                        }
+                    else:
+                        children_menu = {
+                            'id': item['menus__id'],
+                            'name': item['menus__name'],
+                            'path': item['menus__path'],
+                            'component': item['menus__component'],
+                            'meta': {
+                                'title': item['menus__name'],
+                                'noCache': True,
+                            },
+                            'hidden': True,
+                            'pid': item['menus__pid'],
+                            'sort': item['menus__sort']
+                        }
+                    menu_dict[item['menus__id']] = children_menu
+            return menu_dict
+
+    def get_all_menu_dict(self):
+        menus = Menu.objects.all()
+        serializer = MenuSerializer(menus, many=True)
+        tree_dict = {}
+        for item in serializer.data:
+            if item['pid'] is None:
+                if item['is_frame']:
+                    # 判断是否外部链接
+                    top_menu = {
+                        'id': item['id'],
+                        'path': item['path'],
+                        'component': 'components/main',
+                        'children': [{
+                            'path': item['path'],
+                            'meta': {
+                                'title': item['name'],
+                                'icon': item['icon']
+                            }
+                        }],
+                        'pid': item['pid'],
+                        'sort': item['sort']
+                    }
+                else:
+                    top_menu = {
+                        'id': item['id'],
+                        'name': item['name'],
+                        'path': '/' + item['path'],
+                        'component': 'components/main',
+                        'alwaysShow': True,
+                        'meta': {
+                            'title': item['name'],
+                            'icon': item['icon']
+                        },
+                        'pid': item['pid'],
+                        'sort': item['sort'],
+                        'children': []
+                    }
+                tree_dict[item['id']] = top_menu
+            else:
+                if item['is_frame']:
+                    children_menu = {
+                        'id': item['id'],
+                        'name': item['name'],
+                        'path': item['path'],
+                        'component': 'components/main',
+                        'meta': {
+                            'title': item['name'],
+                            'icon': item['icon'],
+                        },
+                        'pid': item['pid'],
+                        'sort': item['sort']
+                    }
+                elif item['is_show']:
+                    children_menu = {
+                        'id': item['id'],
+                        'name': item['name'],
+                        'path': item['path'],
+                        'component': item['component'],
+                        'meta': {
+                            'title': item['name'],
+                            'icon': item['icon'],
+                        },
+                        'pid': item['pid'],
+                        'sort': item['sort']
+                    }
+                else:
+                    children_menu = {
+                        'id': item['id'],
+                        'name': item['name'],
+                        'path': item['path'],
+                        'component': item['component'],
+                        'meta': {
+                            'title': item['name'],
+                            'noCache': True,
+                        },
+                        'hidden': True,
+                        'pid': item['pid'],
+                        'sort': item['sort']
+                    }
+                tree_dict[item['id']] = children_menu
+        return tree_dict
+
+    def get_all_menus(self, request):
+        perms = UserInfoView.get_permission_from_role(request)
+        tree_data = []
+        if 'admin' in perms or request.user.is_superuser:
+            tree_dict = self.get_all_menu_dict()
+            tree_dict = self.get_all_menu_dict()
+        else:
+            tree_dict = self.get_menu_from_role(request)
+        for i in tree_dict:
+            if tree_dict[i]['pid']:
+                pid = tree_dict[i]['pid']
+                parent = tree_dict[pid]
+                parent.setdefault('alwaysShow', True)
+                parent.setdefault('children', []).append(tree_dict[i])
+                # parent['children'] = sorted(parent['children'], key=itemgetter('sort'))
+            else:
+                tree_data.append(tree_dict[i])
+        return tree_data
+
     def get(self, request):
         user = request.user
         if user is not None:
             perms = self.get_permission_from_role(request)
+            routerData = self.get_all_menus(request)
             data = {
                 'id': user.id,
                 'username': user.username,
@@ -44,7 +238,8 @@ class UserInfoView(APIView):
                 'email': user.email,
                 'is_active': user.is_active,
                 'create_time': user.date_joined,
-                'roles': perms
+                'roles': perms,
+                'routerData': routerData
             }
             return Response(data)
 
@@ -122,7 +317,6 @@ class UserBuildMenuView(APIView):
                 'menus__sort',
                 'menus__pid'
             ).distinct()
-            print(menus)
             for item in menus:
                 if item['menus__pid'] is None:
                     if item['menus__is_frame']:
@@ -130,7 +324,7 @@ class UserBuildMenuView(APIView):
                         top_menu = {
                             'id': item['menus__id'],
                             'path': item['menus__path'],
-                            'component': 'Layout',
+                            'component': 'components/main',
                             'children': [{
                                 'path': item['menus__path'],
                                 'meta': {
@@ -146,8 +340,7 @@ class UserBuildMenuView(APIView):
                             'id': item['menus__id'],
                             'name': item['menus__name'],
                             'path': '/' + item['menus__path'],
-                            'redirect': 'noredirect',
-                            'component': 'Layout',
+                            'component': 'components/main',
                             'alwaysShow': True,
                             'meta': {
                                 'title': item['menus__name'],
@@ -164,7 +357,7 @@ class UserBuildMenuView(APIView):
                             'id': item['menus__id'],
                             'name': item['menus__name'],
                             'path': item['menus__path'],
-                            'component': 'Layout',
+                            'component': 'components/main',
                             'meta': {
                                 'title': item['menus__name'],
                                 'icon': item['menus__icon'],
@@ -200,7 +393,6 @@ class UserBuildMenuView(APIView):
                             'sort': item['menus__sort']
                         }
                     menu_dict[item['menus__id']] = children_menu
-            # print(menu_dict)
             return menu_dict
 
     def get_all_menu_dict(self):
@@ -214,7 +406,7 @@ class UserBuildMenuView(APIView):
                     top_menu = {
                         'id': item['id'],
                         'path': item['path'],
-                        'component': 'Layout',
+                        'component': 'components/main',
                         'children': [{
                             'path': item['path'],
                             'meta': {
@@ -230,8 +422,7 @@ class UserBuildMenuView(APIView):
                         'id': item['id'],
                         'name': item['name'],
                         'path': '/' + item['path'],
-                        'redirect': 'noredirect',
-                        'component': 'Layout',
+                        'component': 'components/main',
                         'alwaysShow': True,
                         'meta': {
                             'title': item['name'],
@@ -248,7 +439,7 @@ class UserBuildMenuView(APIView):
                         'id': item['id'],
                         'name': item['name'],
                         'path': item['path'],
-                        'component': 'Layout',
+                        'component': 'components/main',
                         'meta': {
                             'title': item['name'],
                             'icon': item['icon'],
@@ -284,7 +475,6 @@ class UserBuildMenuView(APIView):
                         'sort': item['sort']
                     }
                 tree_dict[item['id']] = children_menu
-        print(tree_dict, 7777)
         return tree_dict
 
     def get_all_menus(self, request):
@@ -298,10 +488,8 @@ class UserBuildMenuView(APIView):
             if tree_dict[i]['pid']:
                 pid = tree_dict[i]['pid']
                 parent = tree_dict[pid]
-                parent.setdefault('redirect', 'noredirect')
                 parent.setdefault('alwaysShow', True)
                 parent.setdefault('children', []).append(tree_dict[i])
-                print(parent['children'], 6666)
                 # parent['children'] = sorted(parent['children'], key=itemgetter('sort'))
             else:
                 tree_data.append(tree_dict[i])
