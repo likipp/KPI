@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from ..models import UserProfile, Menu
 from ..filters import UserFilter
 from utils.baseviews import BasePagination
-from ..serializers.user_serializer import UserListSerializer, UserCreateSerializer, UserModifySerializer, UserInfoListSerializer
+from ..serializers.user_serializer import UserListSerializer, UserCreateSerializer, UserModifySerializer
 from ..serializers.menu_serializer import MenuSerializer
 
 
@@ -26,6 +26,18 @@ class UserInfoView(APIView):
                 for item in request.user.roles.values('permissions__method').distinct():
                     perms_list.append(item['permissions__method'])
                 return perms_list
+        except AttributeError:
+            return None
+    # 定义用户所属的roles组
+
+    def get_roles(self, request):
+        try:
+            if request.user:
+                role = []
+                if request.user.roles:
+                    for item in request.user.roles.all():
+                        role.append(item.name)
+                        return role
         except AttributeError:
             return None
 
@@ -224,8 +236,10 @@ class UserInfoView(APIView):
 
     def get(self, request):
         user = request.user
+        print(user.roles.all())
         if user is not None:
-            perms = self.get_permission_from_role(request)
+            # perms = self.get_permission_from_role(request)
+            roles = self.get_roles(request)
             routerData = self.get_all_menus(request)
             data = {
                 'id': user.id,
@@ -238,7 +252,8 @@ class UserInfoView(APIView):
                 'email': user.email,
                 'is_active': user.is_active,
                 'create_time': user.date_joined,
-                'roles': perms,
+                # 'roles': perms,
+                'roles': roles,
                 'routerData': routerData
             }
             return Response(data)
@@ -272,13 +287,6 @@ class UserViewSet(ModelViewSet):
         else:
             return UserModifySerializer
 
-    # def create(self, request, *args, **kwargs):
-    #     copy_data = request.data.copy()
-    #     copy_data['password'] = '123456'
-    #     serializer = self.get_serializer(data=copy_data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     return Response(serializer.data)
     
     def set_password(self, request, pk=None):
         user = UserProfile.objects.filter(id=pk)

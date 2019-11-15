@@ -7,8 +7,8 @@ from utils.baseviews import BasePagination, TreeAPIView
 
 
 class MenuViewSet(ModelViewSet, TreeAPIView):
-    perms_map = ({'*': 'admin'}, {'*': 'menu_all'}, {'get': 'menu_list'}, {'post': 'menu_create'}, {'put': 'menu_edit'},
-                 {'delete': 'menu_delete'})
+    perms_map = ({'*': 'admin'}, {'*': 'all'}, {'get': 'list'}, {'post': 'create'}, {'put': 'edit'},
+                 {'delete': 'delete'})
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     pagination_class = BasePagination
