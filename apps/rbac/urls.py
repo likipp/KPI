@@ -21,5 +21,5 @@ urlpatterns = [
          name='organization_user_tree'),
     path('menu/tree/', menu_view.MenuTreeView.as_view(), name='menus_tree'),
     path('permission/tree/', permission_view.PermissionTreeView.as_view(), name='permission_tree'),
-    path('auth/build/menus/', user_view.UserBuildMenuView.as_view(), name='build_menus')
+    # path('auth/build/menus/', user_view.UserBuildMenuView.as_view(), name='build_menus')
 ]
