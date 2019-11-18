@@ -11,7 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from ..models import UserProfile, Menu
 from ..filters import UserFilter
-from utils.baseviews import BasePagination
+from utils.pagination import BasePagination
 from ..serializers.user_serializer import UserListSerializer, UserCreateSerializer, UserModifySerializer
 from ..serializers.menu_serializer import MenuSerializer
 
@@ -102,7 +102,7 @@ class UserInfoView(APIView):
                             },
                             'pid': item['menus__pid'],
                             'sort': item['menus__sort'],
-                            'permType': self.get_permission_from_role(request)
+                            'permTypes': self.get_permission_from_role(request)
                         }
                     elif item['menus__is_show']:
                         children_menu = {
@@ -116,7 +116,7 @@ class UserInfoView(APIView):
                             },
                             'pid': item['menus__pid'],
                             'sort': item['menus__sort'],
-                            'permType': self.get_permission_from_role(request)
+                            'permTypes': self.get_permission_from_role(request)
                         }
                     else:
                         children_menu = {
@@ -131,7 +131,7 @@ class UserInfoView(APIView):
                             'hidden': True,
                             'pid': item['menus__pid'],
                             'sort': item['menus__sort'],
-                            'permType': self.get_permission_from_role(request)
+                            'permTypes': self.get_permission_from_role(request)
                         }
                     menu_dict[item['menus__id']] = children_menu
             return menu_dict
@@ -303,6 +303,7 @@ class UserListView(ListAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserListSerializer
     filter_class = UserFilter
+    pagination_class = BasePagination
     # filter_backends = (filters.SearchFilter,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     ordering_fields = ('id', 'date_joined',)

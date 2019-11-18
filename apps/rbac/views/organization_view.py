@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from ..models import Organization
 from ..serializers.organization_serializer import OrganizationSerializer,\
     OrganizationUserTreeSerializer, OrganizationTreeSerializer
-from utils.baseviews import BasePagination
+from utils.pagination import BasePagination
 from utils.baseviews import TreeAPIView
 
 

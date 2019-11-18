@@ -3,7 +3,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from ..models import Menu
 from ..serializers.menu_serializer import MenuSerializer
-from utils.baseviews import BasePagination, TreeAPIView
+from utils.baseviews import TreeAPIView
+from utils.pagination import BasePagination
 
 
 class MenuViewSet(ModelViewSet, TreeAPIView):
