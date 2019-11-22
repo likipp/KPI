@@ -20,3 +20,4 @@ class MenuViewSet(ModelViewSet, TreeAPIView):
 
 class MenuTreeView(TreeAPIView):
     queryset = Menu.objects.all()
+
