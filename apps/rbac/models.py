@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 
 
 class Menu(models.Model):
@@ -11,6 +13,7 @@ class Menu(models.Model):
     sort = models.IntegerField(null=True, blank=True, verbose_name="排序标记")
     component = models.CharField(max_length=200, null=True, blank=True, verbose_name="组件")
     pid = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, verbose_name="父菜单")
+    # roles = GenericRelation(to="Role")
 
     def __str__(self):
         return self.name
@@ -27,8 +30,7 @@ class Permission(models.Model):
     """
     name = models.CharField(max_length=30, unique=True, verbose_name="权限名")
     method = models.CharField(max_length=50, null=True, blank=True, verbose_name="方法")
-    pid = models.ForeignKey("self", null=True, blank=True,
-                            on_delete=models.PROTECT, verbose_name="父权限", related_name="permission_pid")
+    pid = models.ForeignKey("Menu", null=True, blank=True, on_delete=models.PROTECT, verbose_name='父级菜单')
 
     def __str__(self):
         return self.name
@@ -47,6 +49,10 @@ class Role(models.Model):
     permissions = models.ManyToManyField("Permission", blank=True, verbose_name="权限", related_name="role_permissions")
     menus = models.ManyToManyField("Menu", blank=True, verbose_name="菜单", related_name="role_menus")
     desc = models.CharField(max_length=50, blank=True, null=True, verbose_name="描述")
+
+    # content_type = models.ForeignKey(ContentType, '关联的表名称')
+    #     # object_id = models.PositiveIntegerField()
+    #     # content_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
         return self.name
