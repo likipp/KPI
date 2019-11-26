@@ -1,18 +1,21 @@
-from collections import OrderedDict
-
 from rest_framework.generics import ListAPIView
 from rest_framework import serializers
 from rest_framework.response import Response
 
-from rbac.models import Menu
-from rbac.serializers.menu_serializer import MenuSerializer
-from rbac.serializers.permission_serializer import PermissionListSerializer
+from rbac.models import Menu, Permission
 
 
 class TreeSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     label = serializers.CharField(max_length=20, source='name')
     pid = serializers.PrimaryKeyRelatedField(read_only=True)
+
+
+class PermissionTableSerializer(TreeSerializer, serializers.ModelSerializer):
+
+    class Meta:
+        model = Permission
+        fields = ('id', 'name', 'pid', 'method')
 
 
 class TreeAPIView(ListAPIView):
@@ -42,8 +45,8 @@ class TreeAPIView(ListAPIView):
         return Response(results)
 
 
-class PermissionToMenuView(ListAPIView):
-    serializer_class = TreeSerializer
+class PermissionBaseView(ListAPIView):
+    serializer_class = PermissionTableSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -71,11 +74,6 @@ class PermissionToMenuView(ListAPIView):
                             menu_data.append(menu_dict[i])
                 else:
                     tree_data.append(menu_dict[i])
-
-            # template = OrderedDict()
-            # for item in tree_data:
-            #     template.setdefault(item['id'], {**item})
-            # results = template.values()
             results = tree_data
         except KeyError:
             results = serializer.data

@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
 from ..models import Permission
 from ..serializers.permission_serializer import PermissionListSerializer
-from utils.baseviews import TreeAPIView, PermissionToMenuView
+from utils.baseviews import TreeAPIView, PermissionBaseView
 
 
 class PermissionViewSet(viewsets.ModelViewSet):
@@ -16,5 +16,6 @@ class PermissionViewSet(viewsets.ModelViewSet):
     ordering_fields = ('id',)
 
 
-class PermissionTreeView(PermissionToMenuView):
+class PermissionToMenuView(PermissionBaseView):
     queryset = Permission.objects.all()
+
