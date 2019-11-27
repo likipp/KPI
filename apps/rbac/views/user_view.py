@@ -22,20 +22,12 @@ class UserInfoView(APIView):
     def get_permission_from_role(self, request):
         try:
             if request.user:
-                perms_list = []
-                for item in request.user.roles.values('permissions__method').distinct():
-                    perms_list.append(item['permissions__method'])
+                perms_list = {}
+                for item in request.user.roles.values('permissions__method', 'permissions__pid'):
+                    perms_list.setdefault(item['permissions__pid'], []).append(item['permissions__method'])
                 return perms_list
         except AttributeError:
             return None
-
-    # def get_button_menus(self, request):
-    #     menu_button =
-    #     try:
-    #         if request.user:
-    #             roles = request.user.roles.all()
-
-    # 定义用户所属的roles组
 
     def get_roles(self, request):
         try:
@@ -109,22 +101,35 @@ class UserInfoView(APIView):
                             },
                             'pid': item['menus__pid'],
                             'sort': item['menus__sort'],
-                            # 'permTypes': self.get_permission_from_role(request)
                         }
                     elif item['menus__is_show']:
-                        children_menu = {
-                            'id': item['menus__id'],
-                            'name': item['menus__name'],
-                            'path': item['menus__path'],
-                            'component': item['menus__component'],
-                            'meta': {
-                                'title': item['menus__name'],
-                                'icon': item['menus__icon'],
-                            },
-                            'pid': item['menus__pid'],
-                            'sort': item['menus__sort'],
-                            # 'permTypes': self.get_permission_from_role(request)
-                        }
+                        if item['menus__id'] in self.get_permission_from_role(request):
+                            children_menu = {
+                                'id': item['menus__id'],
+                                'name': item['menus__name'],
+                                'path': item['menus__path'],
+                                'component': item['menus__component'],
+                                'meta': {
+                                    'title': item['menus__name'],
+                                    'icon': item['menus__icon'],
+                                },
+                                'pid': item['menus__pid'],
+                                'sort': item['menus__sort'],
+                                'permTypes': self.get_permission_from_role(request)[item['menus__id']]
+                            }
+                        else:
+                            children_menu = {
+                                'id': item['menus__id'],
+                                'name': item['menus__name'],
+                                'path': item['menus__path'],
+                                'component': item['menus__component'],
+                                'meta': {
+                                    'title': item['menus__name'],
+                                    'icon': item['menus__icon'],
+                                },
+                                'pid': item['menus__pid'],
+                                'sort': item['menus__sort'],
+                            }
                     else:
                         children_menu = {
                             'id': item['menus__id'],
@@ -138,10 +143,8 @@ class UserInfoView(APIView):
                             'hidden': True,
                             'pid': item['menus__pid'],
                             'sort': item['menus__sort'],
-                            # 'permTypes': self.get_permission_from_role(request)
                         }
                     menu_dict[item['menus__id']] = children_menu
-            print(menu_dict, 7777)
             return menu_dict
 
     def get_all_menu_dict(self):
@@ -239,7 +242,6 @@ class UserInfoView(APIView):
                 parent = tree_dict[pid]
                 parent.setdefault('alwaysShow', True)
                 parent.setdefault('children', []).append(tree_dict[i])
-                # parent['children'] = sorted(parent['children'], key=itemgetter('sort'))
             else:
                 tree_data.append(tree_dict[i])
         return tree_data
@@ -247,7 +249,6 @@ class UserInfoView(APIView):
     def get(self, request):
         user = request.user
         if user is not None:
-            # perms = self.get_permission_from_role(request)
             roles = self.get_roles(request)
             routerData = self.get_all_menus(request)
             data = {
