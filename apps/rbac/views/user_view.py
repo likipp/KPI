@@ -1,9 +1,9 @@
-from operator import itemgetter
+from django.contrib.auth.hashers import check_password
 
 from rest_framework.generics import ListAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework import filters
 from rest_framework.response import Response
@@ -297,15 +297,22 @@ class UserViewSet(ModelViewSet):
         else:
             return UserModifySerializer
 
+    @action(methods=['post'], detail=True, url_path='change-password', url_name='change-password')
     def set_password(self, request, pk=None):
-        user = UserProfile.objects.filter(id=pk)
+        # user = UserProfile.objects.filter(id=pk).first()
+        user = self.get_object()
+        print(request.data, 6666)
         new_password1 = request.data['new_password1']
         new_password2 = request.data['new_password2']
-        if new_password1 == new_password2:
-            user.set_password(new_password2)
-            return Response('密码修改成功')
+        old_password = request.data['old_password']
+        if check_password(old_password, user.password):
+            if new_password1 == new_password2:
+                user.set_password(new_password2)
+                return Response('密码修改成功')
+            else:
+                return Response('密码修改失败，两次输入不一致')
         else:
-            return Response('密码修改失败，两次输入不一致')
+            return Response('旧密码错误')
 
 
 class UserListView(ListAPIView):
