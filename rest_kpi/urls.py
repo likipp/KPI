@@ -29,6 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('rbac.urls')),
     path('', include('kpi.urls')),
+    path('', include('upload.urls')),
     path('api/docs/', schema_view),
     path('api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token-auth/', obtain_jwt_token),

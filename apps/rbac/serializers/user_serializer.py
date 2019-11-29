@@ -80,7 +80,7 @@ class UserModifySerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id', 'username', 'name', 'mobile', 'email', 'department', 'position', 'superior',
-                  'is_active', 'roles']
+                  'is_active', 'roles', 'avatar']
 
     def validate_mobile(self, mobile):
         regex_mobile = "^1[358]\\d{9}$|^147\\d{8}$|^176\\d{8}$"

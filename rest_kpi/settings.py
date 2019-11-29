@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'kpi',
     'rbac',
+    'upload',
     'corsheaders',
     'rest_framework',
     'django_filters',
