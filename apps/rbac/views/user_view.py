@@ -318,7 +318,11 @@ class UserViewSet(ModelViewSet):
     @action(detail=True, methods=['patch'], url_path='edit-user-center', url_name='edit-user-center')
     def edit_user_center(self, request, pk=None):
         user = self.get_object()
-        print(request.data, user)
+        serializer = UserCenterSerializer(data=request.data)
+        if 'avatar' in request.data:
+            user.avatar = request.data['avatar']
+        else:
+            user.avatar = ''
         user.avatar = request.data['avatar']
         user.name = request.data['name']
         user.username = request.data['username']
