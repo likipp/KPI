@@ -6,6 +6,7 @@ from rbac.views import user_view, organization_view, position_view, role_view, m
 
 router = routers.SimpleRouter()
 router.register('users', user_view.UserViewSet, base_name="users")
+router.register('center', user_view.UserCenterViewSet, base_name='center')
 router.register('organizations', organization_view.OrganizationViewSet, base_name="organizations")
 router.register('position', position_view.PositionViewSet, base_name="position")
 router.register('menus', menu_view.MenuViewSet, base_name="menus")

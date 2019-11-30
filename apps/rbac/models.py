@@ -80,6 +80,13 @@ class Organization(models.Model):
     class Meta:
         verbose_name = "组织架构"
         verbose_name_plural = verbose_name
+        default_permissions = ()
+        permissions = (
+            ('add_organization', '添加部门'),
+            ('change_organization', '修改部门'),
+            ('delete_organization', '删除部门'),
+            ('view_organization', '查看部门')
+        )
 
 
 class Position(models.Model):

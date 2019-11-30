@@ -7,47 +7,6 @@ class UserListSerializer(serializers.ModelSerializer):
     """
     用户列表序列化
     """
-    # roles = serializers.SerializerMethodField()
-    # superior = serializers.SerializerMethodField()
-    # position = serializers.SerializerMethodField()
-    # department = serializers.SerializerMethodField()
-    #
-    # def get_roles(self, obj):
-    #     return obj.roles.values()
-    #
-    # def get_superior(self, obj):
-    #     if obj.superior is not None:
-    #         superior = {
-    #             "id": obj.superior.id,
-    #             "name": obj.superior.name
-    #         }
-    #         return superior
-    #     else:
-    #         superior = {}
-    #         return superior
-    #
-    # def get_position(self, obj):
-    #     if obj.position is not None:
-    #         position = {
-    #             "id": obj.position.id,
-    #             "name": obj.position.name
-    #         }
-    #         return position
-    #     else:
-    #         position = {}
-    #         return position
-    #
-    # def get_department(self, obj):
-    #     if obj.department is not None:
-    #         department = {
-    #             "id": obj.department.id,
-    #             "name": obj.department.name
-    #         }
-    #         return department
-    #     else:
-    #         department = {}
-    #         return department
-
     def to_representation(self, instance):
         ret = super(UserListSerializer, self).to_representation(instance)
         if instance.superior is not None:
@@ -68,7 +27,6 @@ class UserListSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['id', 'username', 'name', 'mobile', 'email', 'avatar', 'department', 'position', 'superior',
                   "is_superuser", "is_staff",  'is_active', 'roles']
-        # depth = 1
 
 
 class UserModifySerializer(serializers.ModelSerializer):
@@ -142,3 +100,10 @@ class UserInfoListSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ('id', 'name', 'mobile', 'email', 'position', 'username',
                   "is_superuser", "is_staff", "is_active", "department", "superior")
+
+
+class UserCenterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'username', 'name', 'avatar']

@@ -13,7 +13,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from ..models import UserProfile, Menu, Role, Permission
 from ..filters import UserFilter
 from utils.pagination import BasePagination
-from ..serializers.user_serializer import UserListSerializer, UserCreateSerializer, UserModifySerializer
+from ..serializers.user_serializer import UserListSerializer, UserCreateSerializer, UserModifySerializer, UserCenterSerializer
 from ..serializers.menu_serializer import MenuSerializer
 
 
@@ -255,6 +255,7 @@ class UserInfoView(APIView):
             data = {
                 'id': user.id,
                 'username': user.username,
+                'name': user.name,
                 # request.build_absolute_uri(), 获取到http://127.0.0.1:8000/api/users/info
                 # user.avatar提示'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
                 # current_scheme_host是Django HttpRequest类中内置的一个方法
@@ -263,7 +264,6 @@ class UserInfoView(APIView):
                 'email': user.email,
                 'is_active': user.is_active,
                 'create_time': user.date_joined,
-                # 'roles': perms,
                 'roles': roles,
                 'routerData': routerData
             }
@@ -315,6 +315,16 @@ class UserViewSet(ModelViewSet):
         else:
             return Response('旧密码错误', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @action(detail=True, methods=['patch'], url_path='edit-user-center', url_name='edit-user-center')
+    def edit_user_center(self, request, pk=None):
+        user = self.get_object()
+        print(request.data, user)
+        user.avatar = request.data['avatar']
+        user.name = request.data['name']
+        user.username = request.data['username']
+        user.save()
+        return Response('修改成功')
+
 
 class UserListView(ListAPIView):
     queryset = UserProfile.objects.all()
@@ -326,3 +336,16 @@ class UserListView(ListAPIView):
     ordering_fields = ('id', 'date_joined',)
     search_fields = ['username', 'name', 'department__name']
 
+
+class UserCenterViewSet(ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserCenterSerializer
+
+    @action(detail=True, methods=['patch'], url_path='user-center', url_name='user-center')
+    def edit_user_center(self, request, pk=None):
+        user = self.get_object()
+        print(request.data, user)
+        user.avatar = request.data['avatar']
+        user.username = request.data['username']
+        user.save()
+        return Response('修改成功')
