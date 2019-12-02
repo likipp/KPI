@@ -41,6 +41,27 @@ class Permission(models.Model):
         ordering = ['id']
 
 
+# class Permissions(models.Model):
+#     """
+#     权限
+#     """
+#     permission_type_choices = (
+#         ("menu", "菜单"),
+#         ("button", "按钮")
+#     )
+#     name = models.CharField(max_length=30, unique=True, verbose_name="名称")
+#     type = models.CharField(max_length=20, choices=permission_type_choices, default="menu", verbose_name="类型")
+#     method = models.CharField(max_length=50, null=True, blank=True, verbose_name="方法")
+#     pid = models.ForeignKey("Self", null=True, blank=True, on_delete=models.PROTECT, verbose_name='父级菜单')
+#
+#     def __str__(self):
+#         return self.name
+#
+#     class Meta:
+#         verbose_name_plural = verbose_name = "权限"
+#         ordering = ['id']
+
+
 class Role(models.Model):
     """
     角色

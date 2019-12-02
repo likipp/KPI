@@ -8,8 +8,6 @@ from utils.pagination import BasePagination
 
 
 class MenuViewSet(ModelViewSet, TreeAPIView):
-    perms_map = ({'*': 'admin'}, {'*': 'all'}, {'get': 'list'}, {'post': 'create'}, {'put': 'edit'},
-                 {'delete': 'delete'})
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     pagination_class = BasePagination
