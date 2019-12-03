@@ -1,8 +1,11 @@
+from collections import OrderedDict
+
 from rest_framework.generics import ListAPIView
 from rest_framework import serializers
 from rest_framework.response import Response
 
 from rbac.models import Menu, Permission
+from rbac.serializers.menu_serializer import MenuSerializer
 
 
 class TreeSerializer(serializers.Serializer):
@@ -80,3 +83,50 @@ class PermissionBaseView(ListAPIView):
         if page is not None:
             return self.get_paginated_response(results)
         return Response(results)
+
+
+class RoleBaseView(ListAPIView):
+    serializer_class = PermissionTableSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        tree_dict = {}
+        tree_data = []
+        role_list = []
+        for item in serializer.data:
+            tree_dict[item['id']] = item
+
+        for i in queryset:
+            role_dict = OrderedDict()
+            role_dict['id'] = i.id
+            role_dict['name'] = i.name
+            role_dict['members'] = [{'id': user.id,
+                                    'name': user.name,
+                                     'username': user.username} for user in i.userProfile_roles.all()]
+            serializer_menu = TreeSerializer(i.menus.all(), many=True)
+            menu_dict = {}
+            for item in serializer_menu.data:
+                menu_dict[item['id']] = item
+
+            for x in menu_dict:
+                if menu_dict[x]['pid']:
+                    pid = menu_dict[x]['pid']
+                    parent = menu_dict[pid]
+                    parent.setdefault('children', []).append(menu_dict[x])
+                    for y in tree_dict:
+                        for z in tree_dict[y]['permissions']:
+                            if menu_dict[x]['id'] == z['pid']:
+                                z['type'] = 'children'
+                                menu_dict[x].setdefault('children', []).append(z)
+                else:
+                    tree_data.append(menu_dict[x])
+            for a in list(menu_dict):
+                if menu_dict[a]['pid'] is not None:
+                    del menu_dict[a]
+                    continue
+            role_dict['permissions'] = menu_dict
+            role_list.append(role_dict)
+        return Response(role_list)
+
