@@ -90,14 +90,15 @@ class RoleBaseView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
+        # page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(queryset, many=True)
         tree_dict = {}
-        tree_data = []
+        # tree_data = []
         role_list = []
         for item in serializer.data:
             tree_dict[item['id']] = item
 
+        # print(tree_dict, 66666)
         for i in queryset:
             role_dict = OrderedDict()
             role_dict['id'] = i.id
@@ -107,26 +108,49 @@ class RoleBaseView(ListAPIView):
                                      'username': user.username} for user in i.userProfile_roles.all()]
             serializer_menu = TreeSerializer(i.menus.all(), many=True)
             menu_dict = {}
+            button_dict = {}
+            tree_data = []
             for item in serializer_menu.data:
-                menu_dict[item['id']] = item
+                button_dict[item['id']] = item
+            menu_dict.setdefault(i.id, []).append(button_dict)
 
             for x in menu_dict:
-                if menu_dict[x]['pid']:
-                    pid = menu_dict[x]['pid']
-                    parent = menu_dict[pid]
-                    parent.setdefault('children', []).append(menu_dict[x])
-                    for y in tree_dict:
-                        for z in tree_dict[y]['permissions']:
-                            if menu_dict[x]['id'] == z['pid']:
-                                z['type'] = 'children'
-                                menu_dict[x].setdefault('children', []).append(z)
-                else:
-                    tree_data.append(menu_dict[x])
-            for a in list(menu_dict):
-                if menu_dict[a]['pid'] is not None:
-                    del menu_dict[a]
-                    continue
-            role_dict['permissions'] = menu_dict
+                for y in menu_dict[x]:
+                    for z in y:
+                        if y[z]['pid']:
+                            pid = y[z]['pid']
+                            parent = y[pid]
+                            parent.setdefault('children', []).append(y[z])
+                            for a in tree_dict:
+                                if a == x:
+                                    for b in tree_dict[a]['permissions']:
+                                        if y[z]['id'] == b['pid']:
+                                            b['type'] = 'children'
+                                            y[z].setdefault('children', []).append(b)
+                            #     for b in tree_dict[a]['permissions']:
+                            #         if y[z]['id'] == b['pid']:
+                            #             b['type'] = 'children'
+                            #             y[z].setdefault('children', []).append(b)
+                        else:
+                            tree_data.append(y[z])
+            #     if menu_dict[x]['pid']:
+            #         pid = menu_dict[x]['pid']
+            #         parent = menu_dict[pid]
+            #         parent.setdefault('children', []).append(menu_dict[x])
+            #         for y in tree_dict:
+            #             for z in tree_dict[y]['permissions']:
+            #                 print(z)
+            #                 print(menu_dict[x])
+            #                 if menu_dict[x]['id'] == z['pid']:
+            #                     z['type'] = 'children'
+            #                     menu_dict[x].setdefault('children', []).append(z)
+            #     else:
+            #         tree_data.append(menu_dict[x])
+            # for a in list(menu_dict):
+            #     if menu_dict[a]['pid'] is not None:
+            #         del menu_dict[a]
+            #         continue
+            role_dict['permissions'] = tree_data
             role_list.append(role_dict)
         return Response(role_list)
 
