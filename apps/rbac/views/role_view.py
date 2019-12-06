@@ -56,6 +56,28 @@ class RoleSingleViewSet(ModelViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSingleUpdateSerializer
 
-    @action(detail=True, methods=['get'], url_path='get-single-role', url_name='et-single-role')
+    @action(detail=True, methods=['get'], url_path='get-permission', url_name='get-permission')
     def get_role(self, request, pk=None):
-        return Response(2222)
+        results = {}
+        # get方法, 前端传递数据时, 后端接收数据需要使用query_params. 官方资料里有介绍
+        print(request.query_params, 'params')
+        # 角色的ID值
+        roleId = int(request.query_params['roleId'])
+        # 角色下存在的菜单权限
+        menuId = int(request.query_params['menuId'])
+        # 菜单下存在的按钮权限
+        permissionId = int(request.query_params['permissionId'])
+        querysetPermission = Role.objects.filter(id=roleId)
+        roleData = self.get_serializer(querysetPermission, many=True).data
+        for menu in roleData[0]['permissions']:
+            if menu['id'] == menuId:
+                if menu['children']:
+                    for permission in menu['children']:
+                        if permission['id'] == permissionId:
+                            print(permission)
+                            results = permission['children']
+                else:
+                    results = {}
+        return Response(results)
+
+
