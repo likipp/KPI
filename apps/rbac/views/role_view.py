@@ -37,6 +37,18 @@ class RoleViewSet(ModelViewSet, RoleBaseView):
         print(permission.data)
         return Response(permission.data)
 
+    @action(detail=True, methods=['patch'], url_path='add-role-permission', url_name='add-role-permission')
+    def add_permission_to_role(self, request, pk=None):
+        role = Role.objects.filter(id=pk).first()
+        print(request.data['id'], type(request.data['id']))
+        for i in role.permissions.all():
+            for y in request.data['id']:
+                if i.id == int(y):
+                    return Response('权限已经拥有')
+                else:
+                    role.permissions.add(y)
+        return Response('添加权限成功')
+
     # @action(detail=True, methods=['get'], url_path='get-role-permission', url_name='get-role-permission')
     # def get_permissions_from_role(self, request, pk=None):
     #     return Response(2222)
