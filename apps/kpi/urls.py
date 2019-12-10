@@ -2,7 +2,7 @@ from rest_framework import routers
 
 from django.urls import path, include
 
-from .views import KPIViewSet, GroupKPIViewSet, KpiDashViewSet
+from .views import KPIViewSet, GroupKPIViewSet, KpiDashViewSet, GroupKPIEnabled
 
 router = routers.SimpleRouter()
 router.register('kpi', KPIViewSet, base_name='kpi')
@@ -12,4 +12,5 @@ router.register('dash', KpiDashViewSet, base_name='dash')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('kpi/enabled/', GroupKPIEnabled.as_view(), name='kpi_enable')
 ]

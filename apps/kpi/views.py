@@ -77,8 +77,10 @@ class GroupKPIEnabled(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = KPI.objects.exclude(status='disabled').all()
-        serializer = self.get_serializer(queryset, many=True)
-        pass
+        serializer = GroupKPISerializers(data=queryset, many=True)
+        serializer.is_valid()
+        print(queryset, 5555, serializer.data)
+        return Response(serializer.data)
 
 
 class GroupKPIViewSet(viewsets.ModelViewSet):
