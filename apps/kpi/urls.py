@@ -12,5 +12,5 @@ router.register('dash', KpiDashViewSet, base_name='dash')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('kpi/enabled/', GroupKPIEnabled.as_view(), name='kpi_enable')
+    path('kpi_enabled/', GroupKPIEnabled.as_view(), name='kpi_enabled')
 ]
