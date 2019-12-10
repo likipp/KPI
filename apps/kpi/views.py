@@ -3,15 +3,18 @@ from datetime import datetime
 from django.shortcuts import render
 
 from rest_framework import viewsets, mixins
+from rest_framework.generics import ListAPIView
 from rest_framework import filters
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
-from .models import KPI, GroupKPI, KpiInput, UserProfile
+from .models import KPI, GroupKPI, KpiInput, UserProfile, Organization
 from .serializers import KPISerializers, GroupKPISerializers, KpiInputSerializers
 from rbac.serializers.organization_serializer import OrganizationSerializer
 from .filters import KPIFilter, GroupKPIFilter, KpiInputFilter
 from utils.permissions import IsOwner, IsSuperUser
 from utils.select import dash_list
+from utils.pagination import BasePagination
 
 
 class KPIViewSet(viewsets.ModelViewSet):
@@ -30,10 +33,38 @@ class KPIViewSet(viewsets.ModelViewSet):
                 更新记录部分字段
     """
     queryset = KPI.objects.all()
+    pagination_class = BasePagination
     serializer_class = KPISerializers
     filterset_class = KPIFilter
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ['name']
+
+    @action(detail=True, methods=["get"], url_name="unused", url_path="unused")
+    def get_unused(self, request, pk=None):
+        ret = []
+        kpiAll = []
+        kpi = KPI.objects.exclude(status='disabled').all()
+        for i in kpi:
+            kpiAll.append(i)
+        dep_queryset = Organization.objects.filter(name=request.query_params['dep']).all()
+        # dep_queryset = Organization.objects.filter(name=request.data['dep']).all()
+        for dep in dep_queryset:
+            if dep.groupkpi_set.all():
+                for groupkpi in dep.groupkpi_set.all():
+                    if groupkpi.kpi in kpiAll:
+                        kpiAll.remove(groupkpi.kpi)
+                        for kpi in kpiAll:
+                            kpi_list = {"id": kpi.id, "name": kpi.name}
+                            ret.append(kpi_list)
+            else:
+                for kpi in kpiAll:
+                    kpi_list = {"id": kpi.id, "name": kpi.name}
+                    ret.append(kpi_list)
+        print(ret)
+        return Response(ret)
+
+# class KPIUnUsed(ListAPIView):
+#     queryset = KPI.objects.exclude(status='disabled').all()
 
 
 class GroupKPIViewSet(viewsets.ModelViewSet):
@@ -52,6 +83,7 @@ class GroupKPIViewSet(viewsets.ModelViewSet):
                 更新记录部分字段
     """
     queryset = GroupKPI.objects.all()
+    pagination_class = BasePagination
     serializer_class = GroupKPISerializers
     filterset_class = GroupKPIFilter
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)

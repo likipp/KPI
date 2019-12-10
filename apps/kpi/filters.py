@@ -15,10 +15,11 @@ class GroupKPIFilter(filters.FilterSet):
 
 class KPIFilter(filters.FilterSet):
     name = filters.CharFilter(lookup_expr="icontains", field_name="name")
+    status = filters.CharFilter(lookup_expr="icontains", field_name="name")
 
     class Meta:
         model = KPI
-        fields = ["name"]
+        fields = ["name", "status"]
 
 
 class KpiInputFilter(filters.FilterSet):
