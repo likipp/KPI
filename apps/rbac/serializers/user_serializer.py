@@ -47,6 +47,16 @@ class UserModifySerializer(serializers.ModelSerializer):
         return mobile
 
 
+class UserCenterSerializer(serializers.ModelSerializer):
+    """
+    个人中心序列化
+    """
+
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'username', 'name', 'avatar']
+
+
 class UserCreateSerializer(serializers.ModelSerializer):
     """
     创建用户序列化

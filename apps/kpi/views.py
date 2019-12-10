@@ -60,11 +60,25 @@ class KPIViewSet(viewsets.ModelViewSet):
                 for kpi in kpiAll:
                     kpi_list = {"id": kpi.id, "name": kpi.name}
                     ret.append(kpi_list)
-        print(ret)
         return Response(ret)
 
-# class KPIUnUsed(ListAPIView):
-#     queryset = KPI.objects.exclude(status='disabled').all()
+    @action(detail=True, methods=["get"], url_name="enabled", url_path="enabled")
+    def get_enabled(self, request, pk=None):
+        ret = []
+        kpi = KPI.objects.exclude(status='disabled').all()
+        for i in kpi:
+            kpi_list = {"id": kpi.id, "name": kpi.name}
+            ret.append(kpi_list)
+        return Response(ret)
+
+
+class GroupKPIEnabled(ListAPIView):
+    serializer_class = GroupKPISerializers
+
+    def list(self, request, *args, **kwargs):
+        queryset = KPI.objects.exclude(status='disabled').all()
+        serializer = self.get_serializer(queryset, many=True)
+        pass
 
 
 class GroupKPIViewSet(viewsets.ModelViewSet):
@@ -82,20 +96,13 @@ class GroupKPIViewSet(viewsets.ModelViewSet):
         partial_update:
                 更新记录部分字段
     """
+    pagination_class = BasePagination
     queryset = GroupKPI.objects.all()
     pagination_class = BasePagination
     serializer_class = GroupKPISerializers
     filterset_class = GroupKPIFilter
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ['dep__name', 'kpi__name']
-
-    # def create(self, request, *args, **kwargs):
-    #     dep = request.data['dep']
-    #     has_kpi = GroupKPI.objects.filter(request.data['dep']).all()
-    #     if has_kpi:
-    #         kpi = GroupKPI.objects.exclude(request.data['dep'])
-    #     print(request.data)
-    #     pass
 
 
 class KpiInputViewSet(viewsets.ModelViewSet):
