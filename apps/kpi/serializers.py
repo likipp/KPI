@@ -26,9 +26,9 @@ class GroupKPISerializers(serializers.ModelSerializer):
     """
         部门KPI序列化
     """
+    # name = serializers.HiddenField(default='', read_only=True)
 
     def to_representation(self, instance):
-        print(instance)
         status = instance.status
         status_name = instance.get_status_display()
         dep_instance = instance.dep
@@ -48,7 +48,14 @@ class GroupKPISerializers(serializers.ModelSerializer):
             "id": kpi_instance.id,
             "name": kpi_instance.name
         }
+        # ret["name"] = instance.name
         return ret
+
+    # def validate_name(self, pk, name):
+    #     print(self, pk, name, 65322)
+    #     if GroupKPI.objects.filter(id=pk).name == name:
+    #         raise serializers.ValidationError(name + ' 部门KPI已存在')
+    #     return name
 
     class Meta:
         model = GroupKPI
@@ -61,17 +68,20 @@ class KpiInputSerializers(serializers.ModelSerializer):
     """
 
     def to_representation(self, instance):
-        user_name = instance.user.nickname
-        group_kpi = instance.groupkpi
-        ret = super(KpiInputSerializers, self).to_representation(instance)
-        ret["status"] = group_kpi.get_status_display()
-        ret["dep"] = group_kpi.dep.name
-        ret["kpi"] = group_kpi.kpi.name
-        ret["user"] = user_name
-        ret['r_value'] = instance.r_value
-        ret["t_value"] = group_kpi.t_value
-        ret["l_limit"] = group_kpi.l_limit
-        return ret
+        if instance.group_kpi is not None:
+            user_name = instance.user.name
+            group_kpi = instance.group_kpi
+            ret = super(KpiInputSerializers, self).to_representation(instance)
+            ret["status"] = group_kpi.get_status_display()
+            ret["dep"] = group_kpi.dep.name
+            ret["kpi"] = group_kpi.kpi.name
+            ret["user"] = user_name
+            ret['r_value'] = instance.r_value
+            ret["t_value"] = group_kpi.t_value
+            ret["l_limit"] = group_kpi.l_limit
+            return ret
+        else:
+            return []
 
     class Meta:
         model = KpiInput

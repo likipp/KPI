@@ -53,32 +53,23 @@ class KPIViewSet(viewsets.ModelViewSet):
                 for groupkpi in dep.groupkpi_set.all():
                     if groupkpi.kpi in kpiAll:
                         kpiAll.remove(groupkpi.kpi)
-                        for kpi in kpiAll:
-                            kpi_list = {"id": kpi.id, "name": kpi.name}
-                            ret.append(kpi_list)
             else:
                 for kpi in kpiAll:
                     kpi_list = {"id": kpi.id, "name": kpi.name}
                     ret.append(kpi_list)
-        return Response(ret)
-
-    @action(detail=True, methods=["get"], url_name="enabled", url_path="enabled")
-    def get_enabled(self, request, pk=None):
-        ret = []
-        kpi = KPI.objects.exclude(status='disabled').all()
-        for i in kpi:
+        for kpi in kpiAll:
             kpi_list = {"id": kpi.id, "name": kpi.name}
             ret.append(kpi_list)
         return Response(ret)
 
 
 class GroupKPIEnabled(ListAPIView):
-    # queryset = KPI.objects.exclude(status='disabled').all()
+    queryset = KPI.objects.exclude(status='disabled').all()
     serializer_class = KPISerializers
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        queryset = self.get_queryset()
+        serializer = KPISerializers(queryset, many=True)
         # serializer.is_valid()
         return Response(serializer.data)
 
@@ -100,7 +91,6 @@ class GroupKPIViewSet(viewsets.ModelViewSet):
     """
     pagination_class = BasePagination
     queryset = GroupKPI.objects.all()
-    pagination_class = BasePagination
     serializer_class = GroupKPISerializers
     filterset_class = GroupKPIFilter
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
@@ -126,8 +116,8 @@ class KpiInputViewSet(viewsets.ModelViewSet):
     serializer_class = KpiInputSerializers
     filterset_class = KpiInputFilter
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
-    search_fields = ['groupkpi__dep__name', 'groupkpi__kpi__name']
-    permission_classes = (IsOwner,)
+    search_fields = ['group_kpi__dep__name', 'group_kpi__kpi__name']
+    # permission_classes = (IsOwner,)
 
     def get_queryset(self):
         if self.request.user.is_superuser:

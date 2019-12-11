@@ -44,6 +44,10 @@ class GroupKPI(models.Model):
     def __str__(self):
         return '{}_{}'.format(self.dep, self.kpi.name)
 
+    @property
+    def name(self):
+        return '{}-{}'.format(self.dep, self.kpi.name)
+
 
 class KpiInput(models.Model):
     r_value = models.FloatField('实际值', max_length=10)
