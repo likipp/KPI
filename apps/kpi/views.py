@@ -144,9 +144,11 @@ class KpiDashViewSet(viewsets.ModelViewSet):
         ret = dict()
         dep_dict = dict()
         kpi = request.data.get('kpi') or None
-        kpi_id = self.serializer_kpi.Meta.model.objects.filter(name=kpi).first()
-        dep = self.serializer_dep.Meta.model.objects.filter(name=request.data.get('name')).first().id
+        # kpi_id = self.serializer_kpi.Meta.model.objects.filter(name=kpi).first()
+        # dep = self.serializer_dep.Meta.model.objects.filter(name=request.data.get('dep')).first().id
+        dep = request.data.get('dep')
         if kpi:
+            kpi_id = self.serializer_kpi.Meta.model.objects.filter(id=kpi).first()
             group_kpi = kpi_id.group_kpi.first()
             if request.user.is_superuser:
                 input_list = group_kpi.input_group.all()
