@@ -40,6 +40,13 @@ class GroupKPI(models.Model):
     class Meta:
         verbose_name_plural = verbose_name = "部门KPI"
         ordering = ["id", "dep"]
+        default_permissions = ()
+        permissions = (
+            ('add_groupkpi', '添加部门KPI'),
+            ('change_groupkpi', '修改部门KPI'),
+            ('delete_groupkpi', '删除部门KPI'),
+            ('view_groupkpi', '查看部门KPI')
+        )
 
     def __str__(self):
         return '{}_{}'.format(self.dep, self.kpi.name)
@@ -62,6 +69,13 @@ class KpiInput(models.Model):
     class Meta:
         verbose_name_plural = verbose_name = "KPI数据输入"
         ordering = ["month"]
+        default_permissions = ()
+        permissions = (
+            ('add_kpiinput', '添加数据'),
+            ('change_kpiinput', '修改数据'),
+            ('delete_kpiinput', '删除数据'),
+            ('view_kpiinput', '查看数据')
+        )
 
     def __str__(self):
         return '{}_{}'.format(self.user, self.group_kpi)
