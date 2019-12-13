@@ -144,9 +144,8 @@ class KpiDashViewSet(viewsets.ModelViewSet):
         ret = dict()
         dep_dict = dict()
         kpi = request.data.get('kpi') or None
-        # kpi_id = self.serializer_kpi.Meta.model.objects.filter(name=kpi).first()
-        # dep = self.serializer_dep.Meta.model.objects.filter(name=request.data.get('dep')).first().id
         dep = request.data.get('dep')
+        # dep = Organization.objects.filter(id=request.data.get('dep')).first().name
         if kpi:
             kpi_id = self.serializer_kpi.Meta.model.objects.filter(id=kpi).first()
             group_kpi = kpi_id.group_kpi.first()
@@ -155,17 +154,21 @@ class KpiDashViewSet(viewsets.ModelViewSet):
             else:
                 input_list = group_kpi.input_group.filter(user=request.user)
             list_sort = dict()
-            dash_list(input_list, list_sort, dep_dict, kpi)
+            dash_list(input_list, list_sort, dep_dict, kpi_id)
             ret[dep] = dep_dict
+            return Response(ret)
         else:
             groupkpi = GroupKPI.objects.filter(dep=dep)
-            for i in groupkpi:
-                if request.user.is_superuser:
-                    input_list = i.input_group.all()
-                else:
-                    input_list = i.input_group.filter(user=request.user)
-                list_sort = dict()
-                kpi = i.kpi.name
-                dash_list(input_list, list_sort, dep_dict, kpi)
-                ret[dep] = dep_dict
-        return Response(ret)
+            if groupkpi:
+                for i in groupkpi:
+                    if request.user.is_superuser:
+                        input_list = i.input_group.all()
+                    else:
+                        input_list = i.input_group.filter(user=request.user)
+                    list_sort = dict()
+                    kpi = i.kpi
+                    dash_list(input_list, list_sort, dep_dict, kpi)
+                    ret[dep] = dep_dict
+                return Response(ret)
+            else:
+                return Response('部门指标未创建', status=251)
