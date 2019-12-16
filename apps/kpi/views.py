@@ -2,17 +2,19 @@ from datetime import datetime
 
 from django.shortcuts import render
 
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
 from rest_framework import filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
+from rest_framework_guardian import filters as g_filter
 
 from .models import KPI, GroupKPI, KpiInput, UserProfile, Organization
 from .serializers import KPISerializers, GroupKPISerializers, KpiInputSerializers
 from rbac.serializers.organization_serializer import OrganizationSerializer
 from .filters import KPIFilter, GroupKPIFilter, KpiInputFilter
-from utils.permissions import IsOwner, IsSuperUser
+from utils.permissions import IsOwnerOrSuperUser, IsSuperUser, ReadOnly, CanPutAndUpdate
 from utils.select import dash_list
 from utils.pagination import BasePagination
 
@@ -92,8 +94,9 @@ class GroupKPIViewSet(viewsets.ModelViewSet):
     pagination_class = BasePagination
     queryset = GroupKPI.objects.all()
     serializer_class = GroupKPISerializers
+    permission_classes = [CanPutAndUpdate]
     filterset_class = GroupKPIFilter
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter, g_filter.ObjectPermissionsFilter)
     search_fields = ['dep__name', 'kpi__name']
 
 
@@ -117,7 +120,8 @@ class KpiInputViewSet(viewsets.ModelViewSet):
     filterset_class = KpiInputFilter
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ['group_kpi__dep__name', 'group_kpi__kpi__name']
-    # permission_classes = (IsOwner,)
+    # permission_classes = [CanPutAndUpdate | IsAuthenticated & ReadOnly | IsSuperUser]
+    permission_classes = [CanPutAndUpdate]
 
     def get_queryset(self):
         if self.request.user.is_superuser:
@@ -132,7 +136,6 @@ class KpiDashViewSet(viewsets.ModelViewSet):
     serializer_dep = OrganizationSerializer
     serializer_groupkpi = GroupKPISerializers
     serializer_kpi = KPISerializers
-    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         if self.request.user.is_superuser:

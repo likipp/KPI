@@ -82,6 +82,6 @@ class KpiInput(models.Model):
         return '{}_{}'.format(self.user, self.group_kpi)
 
 
-class GuardianPermission(models.Model):
-    permission = models.ForeignKey(Permission, on_delete=models.CASCADE, verbose_name='权限', null=True, blank=True)
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name='用户')
+# class GuardianPermission(models.Model):
+#     permission = models.ForeignKey(Permission, on_delete=models.CASCADE, verbose_name='权限', null=True, blank=True)
+#     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name='用户')

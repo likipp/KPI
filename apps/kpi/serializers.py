@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from .models import KPI, GroupKPI, KpiInput
 
@@ -60,6 +61,16 @@ class GroupKPISerializers(serializers.ModelSerializer):
     class Meta:
         model = GroupKPI
         fields = '__all__'
+
+    # def get_permissions_map(self, created):
+    #     current_user = self.content['request'].user
+    #
+    #     return {
+    #         'view_groupkpi': [current_user]
+    #     }
+    #
+    # def assign_permissions(self, permission_map):
+    #     pass
 
 
 class KpiInputSerializers(serializers.ModelSerializer):
